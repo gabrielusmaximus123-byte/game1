@@ -47,7 +47,7 @@ function loop(){
  ctx.save();if(shake){ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake*=.8}background();
  drawF(game.game_player_x(),game.game_player_y(),game.game_player_move(),game.game_player_progress(),game.game_player_guard(),game.game_player_crouch(),game.game_player_flash(),game.game_player_label(),true);
  drawF(game.game_rival_x(),game.game_rival_y(),game.game_rival_move(),game.game_rival_progress(),game.game_rival_guard(),game.game_rival_crouch(),game.game_rival_flash(),game.game_rival_label(),false);ctx.restore();
- if(ended&&!overlay.classList.contains('hidden')){document.querySelector('#result').textContent=ended>0?'VICTORIE':'ÎNFRÂNGERE';document.querySelector('#sub').textContent=ended>0?'Ai câștigat duelul.':'Kage a câștigat runda.';overlay.classList.remove('hidden')}
+ if(ended&&overlay.classList.contains('hidden')){document.querySelector('#result').textContent=ended>0?'VICTORIE':'ÎNFRÂNGERE';document.querySelector('#sub').textContent=ended>0?'Ai câștigat duelul.':'Kage a câștigat runda.';overlay.classList.remove('hidden')}
  requestAnimationFrame(loop);
 }
 
