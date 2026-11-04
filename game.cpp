@@ -59,9 +59,9 @@ void update(Fighter& f,Fighter& other,int mask,bool human){
         if(pressed(mask,SWORD))begin(f,7);
     } else {
         const double dx=other.x-f.x;
-        if(std::abs(dx)>82)f.vx=(dx>0?1:-1)*2.25;
+        if(std::abs(dx)>105)f.vx=(dx>0?1:-1)*1.35;
         if(std::abs(dx)<160&&other.move&&!other.hit&&std::rand()%100<24)f.blocking=1;
-        if(std::abs(dx)<155&&f.cooldown==0&&std::rand()%100<5)begin(f,1+std::rand()%5);
+        if(std::abs(dx)<155&&f.cooldown==0&&std::rand()%100<2)begin(f,1+std::rand()%5);
     }
     if(f.cooldown==0&&f.queued){const int id=f.queued;f.queued=0;begin(f,id);}
     if(f.move){--f.time;hit(f,other);if(f.time<=0)f.move=0;}
