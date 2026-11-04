@@ -1,0 +1,40 @@
+name: Build and publish C++ game
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/configure-pages@v5
+      - uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: 3.1.74
+      - name: Compile the C++ game core to WebAssembly
+        run: |
+          mkdir dist
+          cp index.html game-ui.js dist/
+          em++ game.cpp -O2 -std=c++17 -s ENVIRONMENT=web -s EXPORTED_FUNCTIONS='["_game_reset","_game_step","_game_player_x","_game_player_y","_game_player_hp","_game_rival_x","_game_rival_y","_game_rival_hp","_game_player_move","_game_rival_move","_game_player_progress","_game_rival_progress","_game_player_guard","_game_rival_guard","_game_player_crouch","_game_rival_crouch","_game_player_flash","_game_rival_flash","_game_player_label","_game_rival_label","_game_over"]' -s EXPORTED_RUNTIME_METHODS='["cwrap"]' -o dist/game.js
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
