@@ -25,7 +25,7 @@ function background(){
  for(const x of [90,870]){ctx.fillStyle='#4b3430';ctx.fillRect(x-3,300,6,130);ctx.fillStyle='#efa95c';ctx.globalAlpha=.7+Math.sin(frame*.08+x)*.2;ctx.beginPath();ctx.arc(x,292,8,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
 }
 function drawF(x,y,id,progress,guard,crouch,flash,label,player){
- const color=player?'#e4ded3':'#161923',kind=id===4?'kick':id===5?'sweep':id===6?'air':id===7?'sword':'punch';
+ const color=player?'#e4ded3':'#687080',kind=id===4?'kick':id===5?'sweep':id===6?'air':id===7?'sword':'punch';
  if(flash%2)ctx.globalAlpha=.45;ctx.save();ctx.translate(x,y);ctx.fillStyle='#090a10';ctx.beginPath();ctx.ellipse(0,2,31,7,0,0,Math.PI*2);ctx.fill();ctx.scale(player?1:-1,1);
  const low=crouch||kind==='sweep',bodyTop=low?-48:-65,headY=low?-63:-79;
  const swing=Math.sin(Math.max(0,Math.min(1,progress))*Math.PI),extension=56*swing;
