@@ -1,13 +1,14 @@
 const canvas=document.querySelector('#game'),ctx=canvas.getContext('2d');
 const hp1=document.querySelector('#hp1'),hp2=document.querySelector('#hp2'),overlay=document.querySelector('#message');
 const keys=new Set();let game={},tapMask=0,frame=0,shake=0,ended=0;
-const keyBits={a:1,ArrowLeft:1,d:2,ArrowRight:2,w:4,ArrowUp:4,j:8,' ':8,k:16,l:32,u:64,o:128,s:256,ArrowDown:256};
+const keyBits={a:1,ArrowLeft:1,arrowleft:1,d:2,ArrowRight:2,arrowright:2,w:4,ArrowUp:4,arrowup:4,j:8,' ':8,k:16,l:32,u:64,o:128,s:256,ArrowDown:256,arrowdown:256};
 const names=['','PUMN','CROȘEU','COMBO!','LOVITURĂ','MĂTURARE','ATAC AERIAN','TĂIETURĂ'];
 function initGame(){
  const funcs=['game_reset','game_step','game_player_x','game_player_y','game_player_hp','game_rival_x','game_rival_y','game_rival_hp','game_player_move','game_rival_move','game_player_progress','game_rival_progress','game_player_guard','game_rival_guard','game_player_crouch','game_rival_crouch','game_player_flash','game_rival_flash','game_player_label','game_rival_label','game_over'];
  for(const name of funcs)game[name]=Module.cwrap(name,'number',name==='game_step'?['number']:[]);
  game.game_reset();requestAnimationFrame(loop);
 }
+window.initGame=initGame;
 window.addEventListener('keydown',e=>{const bit=keyBits[e.key]??keyBits[e.key.toLowerCase()];if(bit){e.preventDefault();keys.add(e.key.toLowerCase())}},{capture:true});
 window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()),{capture:true});window.addEventListener('blur',()=>keys.clear());
 document.querySelectorAll('[data-bit]').forEach(button=>button.addEventListener('pointerdown',e=>{e.preventDefault();canvas.focus({preventScroll:true});tapMask|=Number(button.dataset.bit)}));
