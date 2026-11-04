@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Umbra — Arena</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
+:root{color-scheme:dark;--gold:#e9b75d;--ink:#090b13}*{box-sizing:border-box}body{margin:0;background:#080a10;color:#f6f0e5;font-family:Rajdhani,Arial,sans-serif;min-height:100vh;display:grid;place-items:center;padding:24px}.shell{width:min(100%,1000px)}header{display:flex;justify-content:space-between;align-items:end;margin:0 0 12px}.eyebrow{color:var(--gold);letter-spacing:.28em;font-size:12px;text-transform:uppercase}.title{font-size:32px;line-height:1;font-weight:700;letter-spacing:.08em}.hint{color:#9ba0b2;font-size:14px}.arena{position:relative;border:1px solid #38313a;box-shadow:0 20px 90px #000a;background:#10121c;overflow:hidden}canvas{display:block;width:100%;height:auto;aspect-ratio:16/9}.hud{position:absolute;inset:16px 20px auto;display:grid;grid-template-columns:1fr 1fr;gap:16px;pointer-events:none}.fighter:last-child{text-align:right}.name{font-size:15px;letter-spacing:.16em;color:#e8dfcf}.meter{margin-top:5px;height:13px;border:1px solid #77717b;background:#171822;padding:2px}.fill{height:100%;width:100%;background:linear-gradient(90deg,#c64437,#f0a34b);transition:width .2s}.fighter:last-child .fill{margin-left:auto;background:linear-gradient(90deg,#6599d1,#87d2cc)}.round{position:absolute;top:18px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--gold);letter-spacing:.2em}.message{position:absolute;inset:0;display:grid;place-items:center;background:#07091099;text-align:center}.message.hidden{display:none}.card{padding:24px 34px;background:#0c0e17eF;border:1px solid #6e5635;box-shadow:0 12px 50px #0009}.card h2{margin:0;color:var(--gold);letter-spacing:.14em;font-size:30px}.card p{margin:8px 0 18px;color:#c1bdc0}.button{border:1px solid var(--gold);background:#dba74e;color:#15110a;font:700 15px Rajdhani;padding:9px 22px;letter-spacing:.1em;cursor:pointer}.button:hover{background:#f3cb7c}.footer{display:flex;justify-content:space-between;margin-top:12px;color:#9ba0b2;font-size:14px}.keys{color:#d7c8a7}
+</style></head>
+<body><main class="shell"><header><div><div class="eyebrow">Duel de umbre · 01</div><div class="title">UMBRA / ARENA</div></div><div class="hint">Un prototip de luptă 2D</div></header>
+<section class="arena"><canvas id="game" width="960" height="540" aria-label="Joc de luptă 2D"></canvas><div class="hud"><div class="fighter"><div class="name">TU · RONIN</div><div class="meter"><div id="hp1" class="fill"></div></div></div><div class="fighter"><div class="name">RIVAL · KAGE</div><div class="meter"><div id="hp2" class="fill"></div></div></div></div><div class="round">R O U N D&nbsp; 1</div><div id="message" class="message hidden"><div class="card"><h2 id="result">VICTORIE</h2><p id="sub">Arena te așteaptă din nou.</p><button id="restart" class="button">JOACĂ DIN NOU</button></div></div></section>
+<div class="footer"><span class="keys">MIȘCARE: A / D sau ← / → &nbsp; · &nbsp; SĂRITURĂ: W / ↑</span><span class="keys">ATAC: J / SPACE</span></div></main>
+<script>
+const c=document.querySelector('#game'),ctx=c.getContext('2d'),hp1=document.querySelector('#hp1'),hp2=document.querySelector('#hp2'),overlay=document.querySelector('#message');
+const keys=new Set();let ended=false,frame=0,shake=0;
+const ground=430;
+function fighter(x,color,player){return{x,y:ground,vx:0,vy:0,hp:100,color,player,face:player?1:-1,attack:0,cool:0,flash:0,walk:0}}
+let a,b;
+function reset(){a=fighter(290,'#d9d3cb',true);b=fighter(670,'#171923',false);ended=false;overlay.classList.add('hidden');hp1.style.width=hp2.style.width='100%'}reset();
+window.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp',' ','ArrowDown'].includes(e.key))e.preventDefault();keys.add(e.key.toLowerCase())});window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));document.querySelector('#restart').onclick=reset;
+function hit(att,def){if(att.cool===0&&Math.abs(att.x-def.x)<104&&Math.abs(att.y-def.y)<45&&att.face===(def.x>att.x?1:-1)){def.hp=Math.max(0,def.hp-13);def.vx=att.face*7;def.flash=10;shake=7;att.cool=35;if(def.hp===0){ended=true;document.querySelector('#result').textContent=att.player?'VICTORIE':'ÎNFRÂNGERE';document.querySelector('#sub').textContent=att.player?'Ai câștigat duelul.':'Kage a câștigat runda.';overlay.classList.remove('hidden')}}}
+function updateF(f,other){if(ended)return;f.cool=Math.max(0,f.cool-1);f.attack=Math.max(0,f.attack-1);f.flash=Math.max(0,f.flash-1);f.vx*=.78;f.vy+=.7;f.x+=f.vx;f.y+=f.vy;if(f.y>ground){f.y=ground;f.vy=0}f.x=Math.max(55,Math.min(905,f.x));f.face=other.x>f.x?1:-1;
+if(f.player){if(keys.has('a')||keys.has('arrowleft'))f.vx=-4;if(keys.has('d')||keys.has('arrowright'))f.vx=4;if((keys.has('w')||keys.has('arrowup'))&&f.y===ground)f.vy=-13;if((keys.has('j')||keys.has(' '))&&f.cool===0){f.attack=13;hit(f,other)}}else{let dx=other.x-f.x;if(Math.abs(dx)>75)f.vx=Math.sign(dx)*2.25;if(Math.abs(dx)<100&&f.cool===0&&Math.random()<.055){f.attack=13;hit(f,other)}if(Math.abs(dx)<80&&other.attack>0)f.vx=-f.face*4}f.walk+=Math.abs(f.vx)*.04}
+function background(){let g=ctx.createLinearGradient(0,0,0,540);g.addColorStop(0,'#131827');g.addColorStop(.62,'#222332');g.addColorStop(1,'#100e17');ctx.fillStyle=g;ctx.fillRect(0,0,960,540);ctx.fillStyle='#d7c49b';ctx.globalAlpha=.13;ctx.beginPath();ctx.arc(757,135,62,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+// distant mountain silhouettes
+ctx.fillStyle='#111622';ctx.beginPath();ctx.moveTo(0,340);for(let x=0;x<=960;x+=80)ctx.lineTo(x,290+Math.sin(x*.025)*35);ctx.lineTo(960,430);ctx.lineTo(0,430);ctx.fill();
+ctx.fillStyle='#1a1821';ctx.fillRect(0,ground+4,960,110);ctx.strokeStyle='#52413a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,ground+4);ctx.lineTo(960,ground+4);ctx.stroke();for(let x=30;x<960;x+=95){ctx.strokeStyle='#292630';ctx.beginPath();ctx.moveTo(x,ground+8);ctx.lineTo(x-34,540);ctx.stroke()}
+// gate and lanterns
+ctx.strokeStyle='#3e3031';ctx.lineWidth=8;ctx.strokeRect(390,205,180,210);ctx.lineWidth=3;ctx.strokeRect(408,224,144,190);for(let x of [90,870]){ctx.fillStyle='#4b3430';ctx.fillRect(x-3,300,6,ground-300);ctx.fillStyle='#efa95c';ctx.globalAlpha=.7+Math.sin(frame*.08+x)*.2;ctx.beginPath();ctx.arc(x,292,8,0,7);ctx.fill();ctx.globalAlpha=1}}
+function drawF(f){let x=f.x,y=f.y;if(f.flash%2)ctx.globalAlpha=.5;ctx.save();ctx.translate(x,y);ctx.scale(f.face,1);ctx.fillStyle='#090a10';ctx.beginPath();ctx.ellipse(0,2,29,6,0,0,7);ctx.fill();ctx.fillStyle=f.color;ctx.strokeStyle=f.color;ctx.lineWidth=11;ctx.lineCap='round';const step=Math.sin(f.walk)*5, attacking=f.attack>0;
+// legs
+ctx.beginPath();ctx.moveTo(-5,-24);ctx.lineTo(-10+step,-3);ctx.lineTo(-20+step,-1);ctx.moveTo(5,-24);ctx.lineTo(10-step,-3);ctx.lineTo(20-step,-1);ctx.stroke();
+// torso and head
+ctx.lineWidth=15;ctx.beginPath();ctx.moveTo(0,-64);ctx.lineTo(0,-29);ctx.stroke();ctx.fillStyle=f.color;ctx.beginPath();ctx.arc(0,-78,12,0,7);ctx.fill();ctx.fillRect(-10,-91,24,4);ctx.fillStyle='#0a0b10';ctx.fillRect(5,-81,7,2);
+// arms / blade
+ctx.strokeStyle=f.color;ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(0,-57);ctx.lineTo(13,-43);ctx.lineTo(attacking?47:25,-43);ctx.stroke();ctx.strokeStyle='#b9c6d1';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(attacking?42:23,-47);ctx.lineTo(attacking?78:47,-52);ctx.stroke();ctx.restore();ctx.globalAlpha=1}
+function loop(){frame++;updateF(a,b);updateF(b,a);hp1.style.width=a.hp+'%';hp2.style.width=b.hp+'%';ctx.save();if(shake){ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake*=.8}background();drawF(a);drawF(b);ctx.restore();requestAnimationFrame(loop)}loop();
+</script></body></html>
+
